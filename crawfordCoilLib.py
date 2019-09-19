@@ -64,8 +64,7 @@ def genLoops(contours, hull, thetaBounds=None, phiBounds=None, sphereR=1):
             tempLoop = []
             for xy in polygon:
                 # xy[0] = theta, xy[1] = phi
-                if thetaBounds and phiBounds and (xy[0]<thetaBounds[0] or xy[0]>thetaBounds[1] \
-                                                    or xy[1]<phiBounds[0] or xy[1]>phiBounds[1]):
+                if thetaBounds and phiBounds and (thetaBounds[1]<xy[0]<thetaBounds[0] or phiBounds[1]<xy[1]<phiBounds[0]):
                     continue
                 i, j, k= toCart(sphereR, xy[0], xy[1])
                 tempLoop.append(i)
@@ -111,8 +110,32 @@ def maskBounds(x, xBounds, y, yBounds, mesh):
     return mesh
 
 
-# Assigns points on meshes to their closest guard
-# def voronoi():
+# Assigns points on meshes to their closest 'guard'
+# returns newPoints = [[points near guard0], [points near guard1], ...]
+# and newA [[A for points near guard0], [A for points near guard1], ...]
+def assignPoints(x, y, z, A, xG, yG, zG):
+    numGuards = len(xG)
+    newPoints= [ [] for i in range(numGuards) ]
+    newA= [ [] for i in range(numGuards) ]
 
-# Export to text file
-# def export():
+    # For each point, calculate distance to each guard
+    for x1, y1, z1, A1 in zip(x,y,z,A):
+        dist=[]
+        for x2, y2, z2 in zip(xG,yG,zG):
+            dist.append((x1-x2)**2 + (y1-y2)**2 +(z1-z2)**2)
+        # Find the shortest distance and assign points to the guard
+        minIndex = np.argmin(dist)
+        newPoints[minIndex].append([x1, y1, z1])
+        newA[minIndex].append(A1)
+
+    return newPoints, newA
+
+# Takes points [[x0,y0,z0], [x1,y1,z1], [x2,y2,z2] ... ]
+# and shifts them by dx, dy, dz
+def shiftPoints(points, dx, dy, dz):
+    shiftedPoints = np.zeros(np.shape(points))
+    for i,pt in enumerate(points):
+        shiftedPoints[i][0] = pt[0] + dx
+        shiftedPoints[i][1] = pt[1] + dy
+        shiftedPoints[i][2] = pt[2] + dz
+    return shiftedPoints
