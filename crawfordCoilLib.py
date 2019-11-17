@@ -20,6 +20,10 @@ def manyHit(U,hull):
         hitpoints.append(hit(Uvec,hull))
     return np.array(hitpoints)
 
+# Generates hull from xyz coords
+def genHull(x, y, z):
+    return ConvexHull( np.array( (x.T,y.T,z.T) ).T )
+
 # Converts to spherical coordinates
 def toSpherical(x, y, z):
     r = np.sqrt(x**2 + y**2 + z**2)
@@ -74,7 +78,7 @@ def genLoops(contours, hull, thetaBounds=None, phiBounds=None, sphereR=1):
                 # Empty loops should be ignored
                 continue
             tempLoop = np.reshape(tempLoop, (-1,3) )
-            # project each loop back to cylindrical hull
+            # project each loop back to hull
             currentLoops.append( manyHit(tempLoop, hull) )
     return currentLoops
 
@@ -139,3 +143,12 @@ def shiftPoints(points, dx, dy, dz):
         shiftedPoints[i][1] = pt[1] + dy
         shiftedPoints[i][2] = pt[2] + dz
     return shiftedPoints
+
+
+# Takes points [[x0,y0,z0], [x1,y1,z1], [x2,y2,z2] ... ]
+# and returns [x0,x1,x2...]; [y0,y1,y2...]; [z0,z1,z2...]
+def getXYZ(points):
+    x = np.delete(points, [1,2], axis=1).flatten()
+    y = np.delete(points, [0,2], axis=1).flatten()
+    z = np.delete(points, [0,1], axis=1).flatten()
+    return x,y,z

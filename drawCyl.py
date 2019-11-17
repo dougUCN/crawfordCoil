@@ -8,7 +8,7 @@ import crawfordCoilLib as cc
 
 
 xCyl, yCyl, zCyl, A = np.genfromtxt("cylinder-surface.txt", comments='%', unpack=True)
-cylHull = ConvexHull( np.array( (xCyl.T,yCyl.T,zCyl.T) ).T )
+cylHull = cc.genHull(xCyl, yCyl, zCyl)
 
 # Convert to theta-phi space
 # Add slightly periodic boundaries for nicer contouring
